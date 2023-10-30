@@ -4,11 +4,31 @@ import PersonForm from './components/PersonForm'
 import Person from './components/Person'
 import personService from './services/person'
 
+const Notification = ({ message, isSuccess }) => {
+  if (message === null) {
+    return null
+  } else if (isSuccess) {
+    return (
+      <div className='success'>
+        {message}
+      </div>
+    )
+  } else {
+    return (
+      <div className='error'>
+        {message}
+      </div>
+    )
+  }
+}
+
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [message, setMessage] = useState(null)
+  const [isSuccess, setSuccess] = useState(false)
 
   useEffect(() => {
     personService
@@ -27,9 +47,21 @@ const App = () => {
           personService
             .update(p.id, changedPerson)
             .then(returnedPerson => {
+              setSuccess(true)
+              setMessage(`Updated ${returnedPerson.name}`)
+              setTimeout(() => {
+                setMessage(null)
+              }, 5000)
               setPersons(persons.map(per => per.id !== p.id ? per : returnedPerson))
               setNewName('')
               setNewNumber('')
+            })
+            .catch(() => {
+              setMessage(`Information of ${changedPerson.name} has already been removed from the server`)
+              setTimeout(() => {
+                setMessage(null)
+              }, 5000)
+              setPersons(persons.filter(per => per.id !== p.id))
             })
           return
         } 
@@ -50,10 +82,16 @@ const App = () => {
     personService
       .create(nameObject)
       .then(returnedPerson => {
+        setSuccess(true)
+        setMessage(`Added ${returnedPerson.name}`)
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000)
         setPersons([...persons, returnedPerson])
         setNewName('')
         setNewNumber('')
       })
+    
   }
 
   const handleNameChange = (event) => {
@@ -87,6 +125,7 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification message={message} isSuccess={isSuccess} />
       <Filter handleFilterChange={handleFilterChange} />
       <h2>Add New Entry</h2>
       <PersonForm 
