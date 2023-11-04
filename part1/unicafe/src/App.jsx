@@ -4,6 +4,15 @@ const Button = (props) => (
   <button onClick={props.handleClick}>{props.text}</button>
 )
 
+const StatisticLine = ({ text, value}) => {
+  return (
+    <tr>
+      <td>{text}:</td>
+      <td>{value}</td>
+    </tr>
+  )
+}
+
 const Stats = ({ good, neutral, bad }) => {
   const total = good + neutral + bad
   if (total === 0) {
@@ -16,30 +25,12 @@ const Stats = ({ good, neutral, bad }) => {
   return (
     <table>
       <tbody>
-        <tr>
-          <td>Good: </td>
-          <td>{good}</td>
-        </tr>
-        <tr>
-          <td>Neutral: </td>
-          <td>{neutral}</td>
-        </tr>
-        <tr>
-          <td>Bad: </td>
-          <td>{bad}</td>
-        </tr>
-        <tr>
-          <td>All: </td>
-          <td>{total}</td>
-        </tr>
-        <tr>
-          <td>Average: </td>
-          <td>{average}</td>
-        </tr>
-        <tr>
-          <td>Positive: </td>
-          <td>{positive}</td>
-        </tr>
+        <StatisticLine text="Good" value={good} />
+        <StatisticLine text="Neutral" value={neutral} />
+        <StatisticLine text="Bad" value={bad} />
+        <StatisticLine text="All" value={total} />
+        <StatisticLine text="Average" value={average} />
+        <StatisticLine text="Positive" value={positive} />
       </tbody>
     </table>
   )
