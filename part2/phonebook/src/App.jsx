@@ -2,25 +2,8 @@ import { useState, useEffect } from 'react'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Person from './components/Person'
+import Notification from './components/Notification'
 import personService from './services/person'
-
-const Notification = ({ message, isSuccess }) => {
-  if (message === null) {
-    return null
-  } else if (isSuccess) {
-    return (
-      <div className='success'>
-        {message}
-      </div>
-    )
-  } else {
-    return (
-      <div className='error'>
-        {message}
-      </div>
-    )
-  }
-}
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -56,12 +39,13 @@ const App = () => {
               setNewName('')
               setNewNumber('')
             })
-            .catch(() => {
-              setMessage(`Information of ${changedPerson.name} has already been removed from the server`)
+            .catch(error => {
+              console.log(error.response.data.error)
+              setSuccess(false)
+              setMessage(error.response.data.error)
               setTimeout(() => {
                 setMessage(null)
               }, 5000)
-              setPersons(persons.filter(per => per.id !== p.id))
             })
           return
         } 
@@ -91,6 +75,14 @@ const App = () => {
         setNewName('')
         setNewNumber('')
       })
+      .catch(error => {
+        console.log(error.response.data.error)
+        setSuccess(false)
+        setMessage(error.response.data.error)
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000)
+      })
     
   }
 
@@ -116,7 +108,11 @@ const App = () => {
       personService
       .del(id)
       .then(() => {
-        console.log(`Deleted ${person.name} with id ${id}`)
+        setSuccess(true)
+        setMessage(`Deleted ${person.name}`)
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000)
       })
       setPersons(persons.filter(p => p.id !== id))
     }
