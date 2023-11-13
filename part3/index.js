@@ -18,8 +18,6 @@ app.use(express.static('dist'))
 app.use(express.json())
 app.use(requestLogger)
 
-let notes = []
-
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
@@ -44,7 +42,7 @@ app.get('/api/notes/:id', (request, response, next) => {
 
 app.delete('/api/notes/:id', (request, response, next) => {
   Note.findByIdAndDelete(request.params.id)
-    .then(result => {
+    .then(() => {
       response.status(204).end()
     })
     .catch(error => next(error))
@@ -57,7 +55,7 @@ app.post('/api/notes', (request, response, next) => {
     content: body.content,
     important: body.important || false
   })
-  
+
   note.save()
     .then(savedNote => {
       response.json(savedNote)
@@ -69,10 +67,10 @@ app.put('/api/notes/:id', (request, response, next) => {
   const { content, important } = request.body
 
   Note.findByIdAndUpdate(
-    request.params.id, 
-    { content, important }, 
+    request.params.id,
+    { content, important },
     { new: true, runValidators: true, context: 'query' }
-    )
+  )
     .then(updatedNote => {
       response.json(updatedNote)
     })
