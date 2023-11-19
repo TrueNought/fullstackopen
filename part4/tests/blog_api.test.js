@@ -41,6 +41,34 @@ test('correct number of blogs are returned', async () => {
   expect(response.body).toHaveLength(initialBlogs.length)
 })
 
+test('id property of each blog exists', async () => {
+  const response = await api.get('/api/blogs')
+  console.log(response.body)
+  response.body.forEach(blog => {
+    expect(blog.id).toBeDefined()
+  })
+})
+
+test('new blog can be successfully added', async () => {
+  const newBlog = {
+    title: 'Newly Added Blog',
+    author: 'Newbie',
+    url: 'https://new.com',
+    likes: 1
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const response = await api.get('/api/blogs')
+  const titles = response.body.map(blog => blog.title)
+  expect(response.body).toHaveLength(initialBlogs.length + 1)
+  expect(titles).toContain('Newly Added Blog')
+})
+
 afterAll(async () => {
   await mongoose.connection.close()
 })
