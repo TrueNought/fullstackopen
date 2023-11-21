@@ -80,6 +80,33 @@ test('missing likes property in request defaults to 0', async () => {
   expect(response.body.likes).toEqual(0)
 })
 
+describe('bad request response', () => {
+  test('if title is missing', async () => {
+    const newBlog = {
+      author: 'No Title',
+      url: 'https://notitle.com'
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(400)
+  })
+
+  test('if author is missing', async () => {
+    const newBlog = {
+      title: 'No Author',
+      url: 'https://noauthor.com'
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(400)
+  })
+})
+
+
 afterAll(async () => {
   await mongoose.connection.close()
 })
