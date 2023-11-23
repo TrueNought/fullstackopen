@@ -23,5 +23,5 @@ const favoriteBlog = (blogs) => {
 
 module.exports =  {
   totalLikes,
-  favoriteBlog
+  favoriteBlog,
 }
