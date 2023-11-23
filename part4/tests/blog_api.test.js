@@ -8,10 +8,14 @@ const Blog = require('../models/blog')
 
 beforeEach(async () => {
   await Blog.deleteMany({})
-  let blogObject = new Blog(helper.initialBlogs[0])
-  await blogObject.save()
-  blogObject = new Blog(helper.initialBlogs[1])
-  await blogObject.save()
+  console.log('cleared')
+
+  helper.initialBlogs.forEach(async blog => {
+    let blogObject = new Blog(blog)
+    await blogObject.save()
+    console.log('saved')
+  })
+  console.log('done')
 })
 
 describe('when there are blog entries', () => {
