@@ -45,7 +45,7 @@ describe('when adding a new blog', () => {
       title: 'Newly Added Blog',
       author: 'Newbie',
       url: 'https://new.com',
-      likes: 1
+      likes: 1,
     }
 
     await api
@@ -65,7 +65,7 @@ describe('when adding a new blog', () => {
     const newBlog = {
       title: 'No Likes Property',
       author: 'Someone',
-      url: 'https://something.com'
+      url: 'https://something.com',
     }
 
     const response = await api.post('/api/blogs').send(newBlog)
@@ -75,7 +75,7 @@ describe('when adding a new blog', () => {
   test('bad request if title is missing', async () => {
     const newBlog = {
       author: 'No Title',
-      url: 'https://notitle.com'
+      url: 'https://notitle.com',
     }
 
     await api
@@ -87,7 +87,7 @@ describe('when adding a new blog', () => {
   test('bad request if author is missing', async () => {
     const newBlog = {
       title: 'No Author',
-      url: 'https://noauthor.com'
+      url: 'https://noauthor.com',
     }
 
     await api
@@ -119,7 +119,7 @@ describe('updating a blog', () => {
     const blogsStart = await helper.blogsInDb()
     const blogToUpdate = blogsStart[0]
     const newBlogData = {
-      likes: 100
+      likes: 100,
     }
 
     await api
