@@ -4,12 +4,12 @@ const blogSchema = new mongoose.Schema({
   title: {
     type: String,
     minLength: 3,
-    required: true
+    required: true,
   },
   author: {
     type: String,
     minLength: 1,
-    required: true
+    required: true,
   },
   url: {
     type: String,
@@ -17,14 +17,14 @@ const blogSchema = new mongoose.Schema({
       validator: (v) => {
         return /^(ftp|http|https):\/\/[^ "]+$/.test(v)
       },
-      message: '{VALUE} is not a valid link'
+      message: '{VALUE} is not a valid link',
     },
-    required: true
+    required: true,
   },
   likes: {
     type: Number,
-    default: 0
-  }
+    default: 0,
+  },
 })
 
 blogSchema.set('toJSON', {
@@ -32,7 +32,7 @@ blogSchema.set('toJSON', {
     returnedObject.id = returnedObject._id.toString()
     delete returnedObject._id
     delete returnedObject.__v
-  }
+  },
 })
 
 module.exports = mongoose.model('Blog', blogSchema)

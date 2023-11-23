@@ -9,44 +9,48 @@ module.exports = {
   'overrides': [
     {
       'env': {
-        'node': true
+        'node': true,
       },
       'files': [
-        '.eslintrc.{js,cjs}'
+        '.eslintrc.{js,cjs}',
       ],
       'parserOptions': {
-        'sourceType': 'script'
-      }
-    }
+        'sourceType': 'script',
+      },
+    },
   ],
   'parserOptions': {
-    'ecmaVersion': 'latest'
+    'ecmaVersion': 'latest',
   },
   'rules': {
     'indent': [
       'error',
-      2
+      2,
     ],
     'linebreak-style': [
       'error',
-      'windows'
+      'windows',
     ],
     'quotes': [
       'error',
-      'single'
+      'single',
     ],
     'semi': [
       'error',
-      'never'
+      'never',
     ],
     'eqeqeq': 'error',
     'no-trailing-spaces': 'error',
     'object-curly-spacing': [
-      'error', 'always'
+      'error', 'always',
     ],
     'arrow-spacing': [
-      'error', { 'before': true, 'after': true }
+      'error', { 'before': true, 'after': true },
     ],
-    'no-console': 0
-  }
+    'no-console': 0,
+    'comma-dangle': [
+      'error',
+      'always-multiline',
+    ],
+  },
 }
