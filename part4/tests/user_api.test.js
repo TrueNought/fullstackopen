@@ -61,6 +61,38 @@ describe('when there is initially one user in db', () => {
   })
 })
 
+describe('creation of a user', () => {
+  test('fails if password is less than 3 characters long', async () => {
+    const newUser = {
+      username: 'bobjoe',
+      name: 'Bobby',
+      password: 'oh',
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+
+    expect(result.body.error).toContain('Password must be at least 3 characters long')
+  })
+
+  test('fails if username is less than 3 characters long', async () => {
+    const newUser = {
+      username: 'we',
+      name: 'Wendy',
+      password: 'wendy101',
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+
+    expect(result.body.error).toContain('Username must be at least 3 characters long')
+  })
+})
+
 afterAll(async () => {
   await mongoose.connection.close()
 })
