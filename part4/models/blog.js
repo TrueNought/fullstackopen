@@ -1,6 +1,16 @@
 const mongoose = require('mongoose')
 
 const blogSchema = new mongoose.Schema({
+  url: {
+    type: String,
+    validate: {
+      validator: (v) => {
+        return /^(ftp|http|https):\/\/[^ "]+$/.test(v)
+      },
+      message: '{VALUE} is not a valid link',
+    },
+    required: true,
+  },
   title: {
     type: String,
     minLength: 3,
@@ -11,15 +21,9 @@ const blogSchema = new mongoose.Schema({
     minLength: 1,
     required: true,
   },
-  url: {
-    type: String,
-    validate: {
-      validator: (v) => {
-        return /^(ftp|http|https):\/\/[^ "]+$/.test(v)
-      },
-      message: '{VALUE} is not a valid link',
-    },
-    required: true,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
   },
   likes: {
     type: Number,
