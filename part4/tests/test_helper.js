@@ -3,15 +3,15 @@ const User = require('../models/user')
 
 const initialBlogs = [
   {
+    url: 'https://test1.com',
     title: 'Test Blog',
     author: 'Tester 1',
-    url: 'https://test1.com',
     likes: 33,
   },
   {
+    url: 'https://test2.com',
     title: 'Another Test',
     author: 'Tester 2',
-    url: 'https://test2.com',
     likes: 20,
   },
 ]
