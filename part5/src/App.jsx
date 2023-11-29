@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
+import Statusbar from './components/Statusbar'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
@@ -11,6 +12,8 @@ const App = () => {
   const [url, setUrl] = useState('')
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
+  const [message, setMessage] = useState(null)
+  const [success, setSuccess] = useState(false)
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -24,7 +27,9 @@ const App = () => {
     const loggedUserJSON = window.localStorage.getItem('loggedUser')
 
     if (loggedUserJSON) {
-      setUser(JSON.parse(loggedUserJSON))
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      blogService.setToken(user.token)
     }
   }, [])
 
@@ -38,8 +43,18 @@ const App = () => {
       blogService.setToken(user.token)
       setUsername('')
       setPassword('')
+      setSuccess(true)
+      setMessage('Login successful')
+      setTimeout(() => {
+        setMessage(null)
+      }, 5000)
       console.log('Successfully logged in with', username, password)
     } catch (error) {
+      setSuccess(false)
+      setMessage('Wrong username or password')
+      setTimeout(() => {
+        setMessage(null)
+      }, 5000)
       console.error('Wrong credentials')
     }
   }
@@ -48,6 +63,11 @@ const App = () => {
     event.preventDefault()
     window.localStorage.removeItem('loggedUser')
     setUser(null)
+    setSuccess(true)
+    setMessage('Logged out')
+    setTimeout(() => {
+      setMessage(null)
+    }, 5000)
   }
 
   const handleCreate = async (event) => {
@@ -62,25 +82,34 @@ const App = () => {
     try {
       const returnedBlog = await blogService.create(newBlog)
       setBlogs(blogs.concat(returnedBlog))
+      setSuccess(true)
+      setMessage(`${title} by ${author} has been added`)
+      setTimeout(() => {
+        setMessage(null)
+      }, 5000)
       setUrl('')
       setTitle('')
       setAuthor('')
     } catch (error) {
-      console.log(error.response.data.error)
+      setMessage(error.response.data.error)
+      setTimeout(() => {
+        setMessage(null)
+      }, 5000)
     }
   } 
 
   const loginForm = () => (
     <>
       <h2>Please enter your credentials</h2>
+      <Statusbar message={message} success={success} />
       <form onSubmit={handleLogin}>
         <div>
           username: 
-          <input name="Username" value={username} onChange={( {target} ) => setUsername(target.value)} />
+          <input name="username" value={username} onChange={( {target} ) => setUsername(target.value)} />
         </div>
         <div>
           password:
-          <input name="Pasword" value={password} onChange={( {target} ) => setPassword(target.value)} />
+          <input name="pasword" value={password} onChange={( {target} ) => setPassword(target.value)} />
         </div>
         <button type="submit">login</button>
       </form>
@@ -90,6 +119,7 @@ const App = () => {
   const blogForm = () => (
     <>
       <h2>Blog List</h2>
+      <Statusbar message={message} success={success} />
       <div>
         {user.name} logged in
         <button type="submit" onClick={handleLogout}>logout</button>
@@ -101,15 +131,15 @@ const App = () => {
       <form onSubmit={handleCreate}>
         <div>
           url:
-          <input name="Url" value={url} onChange={( {target} ) => setUrl(target.value)} />
+          <input name="url" value={url} onChange={( {target} ) => setUrl(target.value)} />
         </div>
         <div>
           title:
-          <input name="Title" value={title} onChange={( {target} ) => setTitle(target.value)} />
+          <input name="title" value={title} onChange={( {target} ) => setTitle(target.value)} />
         </div>
         <div>
           author:
-          <input name="Author" value={author} onChange={( {target} ) => setAuthor(target.value)} />
+          <input name="author" value={author} onChange={( {target} ) => setAuthor(target.value)} />
         </div>
         <button type="submit">create</button>
       </form>
