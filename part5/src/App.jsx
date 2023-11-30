@@ -91,6 +91,7 @@ const App = () => {
       setTitle('')
       setAuthor('')
     } catch (error) {
+      setSuccess(false)
       setMessage(error.response.data.error)
       setTimeout(() => {
         setMessage(null)
