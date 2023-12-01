@@ -60,7 +60,6 @@ const App = () => {
   }
 
   const handleLogout = (event) => {
-    event.preventDefault()
     window.localStorage.removeItem('loggedUser')
     setUser(null)
     setSuccess(true)
@@ -113,12 +112,12 @@ const App = () => {
         <div>
           {user.name} logged in
           <button type="submit" onClick={handleLogout}>logout</button>
-        </div>
-        <br></br>
+        </div><br />
+        
         <Togglable buttonLabel='new blog' ref={blogFormRef}>
           <BlogForm addBlog={handleCreate} />
-        </Togglable>
-        <br></br>
+        </Togglable><br />
+
         {blogs.map(blog =>
           <Blog key={blog.id} blog={blog} />
         )}
