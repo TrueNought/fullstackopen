@@ -1,4 +1,4 @@
-const Statusbar = ({ message, success }) => {
+const StatusBar = ({ message, success }) => {
   if (!message) {
     return null
   } 
@@ -18,4 +18,4 @@ const Statusbar = ({ message, success }) => {
   }
 }
 
-export default Statusbar
+export default StatusBar
