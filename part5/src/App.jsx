@@ -81,17 +81,29 @@ const App = () => {
     } catch (error) {
       setSuccess(false)
       setMessage(error.response.data.error)
-      setTimeout(() => {
+      setTimeout(() => { 
         setMessage(null)
       }, 5000)
     }
   } 
 
   const handleLike = async (updatedBlog) => {
-    console.log('liked', updatedBlog.title)
-    try{
+    try {
       await blogService.update(updatedBlog.id, updatedBlog)
       setBlogs(blogs.map(b => b.id === updatedBlog.id ? updatedBlog : b))
+    } catch (error) {
+      console.log(error.response.data.error)
+    }
+  }
+
+  const handleDelete = async (deletedBlog) => {
+    try {
+      if (window.confirm(`Remove ${deletedBlog.title} by ${deletedBlog.author}?`)) {
+        await blogService.del(deletedBlog.id)
+        setSuccess(true)
+        setBlogs(blogs.filter(b => b.id !== deletedBlog.id))
+        setMessage(`${deletedBlog.title} has been removed`)
+      }
     } catch (error) {
       console.log(error.response.data.error)
     }
@@ -127,8 +139,8 @@ const App = () => {
           <BlogForm addBlog={handleCreate} />
         </Togglable><br />
 
-        {blogs.map(blog =>
-          <Blog key={blog.id} blog={blog} updateBlog={handleLike}/>
+        {blogs.sort((a,b) => b.likes - a.likes).map(blog =>
+          <Blog key={blog.id} blog={blog} user={user} updateBlog={handleLike} deleteBlog={handleDelete} />
         )}
       </>
     )
