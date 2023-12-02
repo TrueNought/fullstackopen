@@ -1,11 +1,11 @@
 const StatusBar = ({ message, success }) => {
   if (!message) {
     return null
-  } 
+  }
 
   if (success) {
     return (
-      <div className="success"> 
+      <div className="success">
         {message}
       </div>
     )

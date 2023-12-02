@@ -81,11 +81,11 @@ const App = () => {
     } catch (error) {
       setSuccess(false)
       setMessage(error.response.data.error)
-      setTimeout(() => { 
+      setTimeout(() => {
         setMessage(null)
       }, 5000)
     }
-  } 
+  }
 
   const handleLike = async (updatedBlog) => {
     try {
@@ -113,12 +113,12 @@ const App = () => {
     <>
       <form onSubmit={handleLogin}>
         <div>
-          username: 
-          <input name="username" value={username} onChange={( {target} ) => setUsername(target.value)} />
+          username:
+          <input name="username" value={username} onChange={({ target }) => setUsername(target.value)} />
         </div>
         <div>
           password:
-          <input name="pasword" value={password} onChange={( {target} ) => setPassword(target.value)} />
+          <input name="pasword" value={password} onChange={({ target }) => setPassword(target.value)} />
         </div>
         <button type="submit">login</button>
       </form>
@@ -131,7 +131,7 @@ const App = () => {
     return (
       <>
         <div>
-          {user.name} logged in
+          {`${user.name} logged in `}
           <button type="submit" onClick={handleLogout}>logout</button>
         </div><br />
 
@@ -145,14 +145,14 @@ const App = () => {
       </>
     )
   }
-  
+
   return (
     <div>
       <Title user={user} />
       <StatusBar message={message} success={success} />
-      {user === null 
-        ? loginForm() 
-        : blogForm()}      
+      {user === null
+        ? loginForm()
+        : blogForm()}
     </div>
   )
 }

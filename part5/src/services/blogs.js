@@ -34,7 +34,7 @@ const del = async (id) => {
   return response
 }
 
-export default { 
+export default {
   getAll,
   create,
   update,
