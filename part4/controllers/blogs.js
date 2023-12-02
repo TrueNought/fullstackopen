@@ -36,11 +36,11 @@ blogsRouter.post('/', middleware.userExtractor, async (request, response) => {
 })
 
 blogsRouter.put('/:id', async (request, response) => {
-  const { url, title, author, likes } = request.body
+  const body = request.body
 
   const updatedBlog = await Blog.findByIdAndUpdate(
     request.params.id,
-    { url, title, author, likes },
+    { likes: body.likes },
     { new: true },
   )
 

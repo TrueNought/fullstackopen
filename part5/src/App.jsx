@@ -59,7 +59,7 @@ const App = () => {
     }
   }
 
-  const handleLogout = (event) => {
+  const handleLogout = () => {
     window.localStorage.removeItem('loggedUser')
     setUser(null)
     setSuccess(true)
@@ -71,10 +71,9 @@ const App = () => {
 
   const handleCreate = async (newBlog) => {
     try {
-      await blogService.create(newBlog)
-      const blogs = await blogService.getAll()
-      setBlogs(blogs)
+      const blog = await blogService.create(newBlog)
       setSuccess(true)
+      setBlogs([...blogs, blog])
       setMessage(`${newBlog.title} by ${newBlog.author} has been added`)
       setTimeout(() => {
         setMessage(null)
@@ -87,6 +86,16 @@ const App = () => {
       }, 5000)
     }
   } 
+
+  const handleLike = async (updatedBlog) => {
+    console.log('liked', updatedBlog.title)
+    try{
+      await blogService.update(updatedBlog.id, updatedBlog)
+      setBlogs(blogs.map(b => b.id === updatedBlog.id ? updatedBlog : b))
+    } catch (error) {
+      console.log(error.response.data.error)
+    }
+  }
 
   const loginForm = () => (
     <>
@@ -119,7 +128,7 @@ const App = () => {
         </Togglable><br />
 
         {blogs.map(blog =>
-          <Blog key={blog.id} blog={blog} />
+          <Blog key={blog.id} blog={blog} updateBlog={handleLike}/>
         )}
       </>
     )
