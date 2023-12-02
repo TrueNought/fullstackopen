@@ -8,7 +8,7 @@ const Blog = ({ blog }) => {
     paddingLeft: 2,
     border: 'solid',
     borderWidth: 1,
-    marginBottom: 5
+    marginBottom: 5,
   }
 
   const blogDetails = () => {

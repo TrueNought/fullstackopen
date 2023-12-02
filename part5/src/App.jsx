@@ -71,17 +71,17 @@ const App = () => {
 
   const handleCreate = async (newBlog) => {
     try {
-      const returnedBlog = await blogService.create(newBlog)
-      setBlogs(blogs.concat(returnedBlog))
+      await blogService.create(newBlog)
+      const blogs = await blogService.getAll()
+      setBlogs(blogs)
       setSuccess(true)
-      setMessage(`${title} by ${author} has been added`)
+      setMessage(`${newBlog.title} by ${newBlog.author} has been added`)
       setTimeout(() => {
         setMessage(null)
       }, 5000)
     } catch (error) {
       setSuccess(false)
       setMessage(error.response.data.error)
-      console.log('bruh')
       setTimeout(() => {
         setMessage(null)
       }, 5000)
@@ -113,7 +113,7 @@ const App = () => {
           {user.name} logged in
           <button type="submit" onClick={handleLogout}>logout</button>
         </div><br />
-        
+
         <Togglable buttonLabel='new blog' ref={blogFormRef}>
           <BlogForm addBlog={handleCreate} />
         </Togglable><br />
