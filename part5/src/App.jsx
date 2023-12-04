@@ -71,10 +71,13 @@ const App = () => {
 
   const handleCreate = async (newBlog) => {
     try {
-      const blog = await blogService.create(newBlog)
+      blogFormRef.current.toggleVisibility()
+      await blogService.create(newBlog)
+      const blogs = await blogService.getAll()
+      setBlogs(blogs)
       setSuccess(true)
-      setBlogs([...blogs, blog])
       setMessage(`${newBlog.title} by ${newBlog.author} has been added`)
+      console.log(blogs)
       setTimeout(() => {
         setMessage(null)
       }, 5000)
@@ -103,6 +106,9 @@ const App = () => {
         setSuccess(true)
         setBlogs(blogs.filter(b => b.id !== deletedBlog.id))
         setMessage(`${deletedBlog.title} has been removed`)
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000)
       }
     } catch (error) {
       console.log(error.response.data.error)
