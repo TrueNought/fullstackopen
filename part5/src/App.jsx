@@ -90,8 +90,10 @@ const App = () => {
     }
   }
 
-  const handleLike = async (updatedBlog) => {
+  const handleLike = async (id) => {
     try {
+      const blog = blogs.find(blogs => blogs.id === id)
+      const updatedBlog = { ...blog, likes: blog.likes + 1 }
       await blogService.update(updatedBlog.id, updatedBlog)
       setBlogs(blogs.map(b => b.id === updatedBlog.id ? updatedBlog : b))
     } catch (error) {
@@ -99,8 +101,9 @@ const App = () => {
     }
   }
 
-  const handleDelete = async (deletedBlog) => {
+  const handleDelete = async (id) => {
     try {
+      const deletedBlog = blogs.find(blogs => blogs.id === id)
       if (window.confirm(`Remove ${deletedBlog.title} by ${deletedBlog.author}?`)) {
         await blogService.del(deletedBlog.id)
         setSuccess(true)
@@ -146,7 +149,7 @@ const App = () => {
         </Togglable><br />
 
         {blogs.sort((a,b) => b.likes - a.likes).map(blog =>
-          <Blog key={blog.id} blog={blog} user={user} updateBlog={handleLike} deleteBlog={handleDelete} />
+          <Blog key={blog.id} blog={blog} user={user} handleLike={() => handleLike(blog.id)} handleDelete={() => handleDelete(blog.id)} />
         )}
       </>
     )
