@@ -5,13 +5,13 @@ const StatusBar = ({ message, success }) => {
 
   if (success) {
     return (
-      <div className="success">
+      <div className='success'>
         {message}
       </div>
     )
   } else {
     return (
-      <div className ="error">
+      <div className ='error'>
         {message}
       </div>
     )

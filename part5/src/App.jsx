@@ -123,13 +123,13 @@ const App = () => {
       <form onSubmit={handleLogin}>
         <div>
           username:
-          <input name="username" value={username} onChange={({ target }) => setUsername(target.value)} />
+          <input name='username' id='username' value={username} onChange={({ target }) => setUsername(target.value)} />
         </div>
         <div>
           password:
-          <input name="pasword" value={password} onChange={({ target }) => setPassword(target.value)} />
+          <input name='password' id='password' value={password} onChange={({ target }) => setPassword(target.value)} />
         </div>
-        <button type="submit">login</button>
+        <button id='login-button' type='submit'>login</button>
       </form>
     </>
   )
@@ -141,7 +141,7 @@ const App = () => {
       <>
         <div>
           {`${user.name} logged in `}
-          <button type="submit" onClick={handleLogout}>logout</button>
+          <button type='submit' onClick={handleLogout}>logout</button>
         </div><br />
 
         <Togglable buttonLabel='new blog' ref={blogFormRef}>
