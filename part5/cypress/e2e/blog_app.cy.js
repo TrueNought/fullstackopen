@@ -1,13 +1,13 @@
 describe('Blog app', function () {
   beforeEach(function() {
-    cy.request('POST', 'http://localhost:3002/api/testing/reset')
+    cy.request('POST', `${Cypress.env('BACKEND')}/testing/reset`)
     const user = {
       name: 'Tester',
       username: 'test',
       password: 'test',
     }
-    cy.request('POST', 'http://localhost:3002/api/users/', user)
-    cy.visit('http://localhost:5173')
+    cy.request('POST', `${Cypress.env('BACKEND')}/users`, user)
+    cy.visit('')
   })
 
   it('Login form is shown by default', function() {
@@ -60,12 +60,77 @@ describe('Blog app', function () {
         })
       })
 
-      it.only('a user can like that blog', function() {
+      it('a user can like that blog', function() {
         cy.contains('view').click()
         cy.contains('likes: 0')
 
         cy.contains('like').click()
         cy.contains('likes: 1')
+      })
+
+      it('the creator of that blog can delete it', function() {
+        cy.contains('view').click()
+        cy.contains('remove').click()
+
+        cy.contains('I Am A Blog has been removed')
+        cy.wait(5000)
+        cy.get('html').should('not.contain', 'I Am A Blog')
+      })
+
+      it('only the creator can see the delete button of a blog', function() {
+        const user = {
+          name: 'Random',
+          username: 'rando',
+          password: 'rando',
+        }
+        cy.request('POST', `${Cypress.env('BACKEND')}/users`, user)
+
+        cy.contains('view').click()
+        cy.contains('remove').should('exist')
+
+        cy.login({ username: 'rando', password: 'rando' })
+        cy.contains('view').click()
+        cy.contains('remove').should('not.exist')
+      })
+    })
+
+    describe('and multiple blogs exist', function() {
+      beforeEach(function() {
+        cy.createBlog({
+          url: 'https://one.com',
+          title: 'Blog One',
+          author: 'Writer One',
+        })
+        cy.createBlog({
+          url: 'https://two.com',
+          title: 'Blog Two',
+          author: 'Writer Two',
+        })
+        cy.createBlog({
+          url: 'https://three.com',
+          title: 'Blog Three',
+          author: 'Writer Three',
+        })
+      })
+
+      it('blogs are ordered by descending with number of likes', function() {
+        cy.get('.visibilityToggle').each(($el) => {
+          cy.wrap($el).click()
+        })
+
+        cy.contains('Blog Two').parent().contains('like').as('buttonTwo')
+        cy.contains('Blog Three').parent().contains('like').as('buttonThree')
+
+        cy.get('@buttonTwo').click()
+        cy.get('@buttonThree').click()
+
+        cy.contains('likes: 1').then(() => {
+          cy.get('@buttonThree').click()
+        })
+
+        cy.get('.blog').eq(0).should('contain', 'Blog Three')
+        cy.get('.blog').eq(1).should('contain', 'Blog Two')
+        cy.get('.blog').eq(2).should('contain', 'Blog One')
       })
     })
   })
