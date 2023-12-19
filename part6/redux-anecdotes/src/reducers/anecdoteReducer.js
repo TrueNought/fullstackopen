@@ -26,7 +26,6 @@ const anecdoteSlice = createSlice({
   initialState,
   reducers: {
     voteAnecdote(state, action) {
-      console.log('state', JSON.parse(JSON.stringify(state)))
       const id = action.payload
       const curr = state.find(anecdote => anecdote.id === id)
       const changed = {
@@ -36,9 +35,7 @@ const anecdoteSlice = createSlice({
       state.map(anecdote => anecdote.id === id ? changed : anecdote)
     },
     createAnecdote(state, action) {
-      console.log('state', JSON.parse(JSON.stringify(state)))
       const content = action.payload
-      console.log(state)
       state.push({
         content,
         id: getId(),
