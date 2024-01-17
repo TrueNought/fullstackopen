@@ -1,28 +1,13 @@
-import { useReducer } from 'react'
+import { useContext } from 'react'
 import AnecdoteForm from './components/AnecdoteForm'
 import Notification from './components/Notification'
 import { getAll, update } from './services/requests'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import NotificationContext from './components/CounterContext'
-
-const notificationReducer = (state, action) => {
-  switch (action.type) {
-    case 'create':
-      return `anecdote '${action.content}' created`
-    case 'vote':
-      return `anecdote '${action.content}' voted`
-    case 'error':
-      return `${action.content}`
-    case 'clear':
-      return null
-    default:
-      return state
-  }
-}
+import { useNotificationDispatch } from './components/CounterContext'
 
 const App = () => {
   const queryClient = useQueryClient()
-  const [notification, notificationDispatch] = useReducer(notificationReducer, null)
+  const notificationDispatch = useNotificationDispatch()
 
   const result = useQuery({
     queryKey: ['anecdotes'],
@@ -55,7 +40,7 @@ const App = () => {
   const anecdotes = result.data
 
   return (
-    <NotificationContext.Provider value={[notification, notificationDispatch]}>
+    <div>
       <h3>Anecdote App</h3>
     
       <Notification />
@@ -72,7 +57,7 @@ const App = () => {
           </div>
         </div>
       )}
-    </NotificationContext.Provider>
+    </div>
   )
 }
 
