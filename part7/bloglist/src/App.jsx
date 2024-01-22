@@ -90,7 +90,7 @@ const App = () => {
   const handleLike = async (updatedBlog) => {
     try {
       await blogService.update(updatedBlog.id, updatedBlog)
-      setBlogs(blogs.map(b => b.id === updatedBlog.id ? updatedBlog : b))
+      setBlogs(blogs.map((b) => (b.id === updatedBlog.id ? updatedBlog : b)))
     } catch (error) {
       console.log(error.response.data.error)
     }
@@ -98,10 +98,12 @@ const App = () => {
 
   const handleDelete = async (deletedBlog) => {
     try {
-      if (window.confirm(`Remove ${deletedBlog.title} by ${deletedBlog.author}?`)) {
+      if (
+        window.confirm(`Remove ${deletedBlog.title} by ${deletedBlog.author}?`)
+      ) {
         await blogService.del(deletedBlog.id)
         setSuccess(true)
-        setBlogs(blogs.filter(b => b.id !== deletedBlog.id))
+        setBlogs(blogs.filter((b) => b.id !== deletedBlog.id))
         setMessage(`${deletedBlog.title} has been removed`)
       }
     } catch (error) {
@@ -114,11 +116,19 @@ const App = () => {
       <form onSubmit={handleLogin}>
         <div>
           username:
-          <input name="username" value={username} onChange={({ target }) => setUsername(target.value)} />
+          <input
+            name="username"
+            value={username}
+            onChange={({ target }) => setUsername(target.value)}
+          />
         </div>
         <div>
           password:
-          <input name="pasword" value={password} onChange={({ target }) => setPassword(target.value)} />
+          <input
+            name="pasword"
+            value={password}
+            onChange={({ target }) => setPassword(target.value)}
+          />
         </div>
         <button type="submit">login</button>
       </form>
@@ -132,16 +142,28 @@ const App = () => {
       <>
         <div>
           {`${user.name} logged in `}
-          <button type="submit" onClick={handleLogout}>logout</button>
-        </div><br />
+          <button type="submit" onClick={handleLogout}>
+            logout
+          </button>
+        </div>
+        <br />
 
-        <Togglable buttonLabel='new blog' ref={blogFormRef}>
+        <Togglable buttonLabel="new blog" ref={blogFormRef}>
           <BlogForm addBlog={handleCreate} />
-        </Togglable><br />
+        </Togglable>
+        <br />
 
-        {blogs.sort((a,b) => b.likes - a.likes).map(blog =>
-          <Blog key={blog.id} blog={blog} user={user} updateBlog={handleLike} deleteBlog={handleDelete} />
-        )}
+        {blogs
+          .sort((a, b) => b.likes - a.likes)
+          .map((blog) => (
+            <Blog
+              key={blog.id}
+              blog={blog}
+              user={user}
+              updateBlog={handleLike}
+              deleteBlog={handleDelete}
+            />
+          ))}
       </>
     )
   }
@@ -150,9 +172,7 @@ const App = () => {
     <div>
       <Title user={user} />
       <StatusBar message={message} success={success} />
-      {user === null
-        ? loginForm()
-        : blogForm()}
+      {user === null ? loginForm() : blogForm()}
     </div>
   )
 }

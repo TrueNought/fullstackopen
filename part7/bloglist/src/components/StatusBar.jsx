@@ -4,17 +4,9 @@ const StatusBar = ({ message, success }) => {
   }
 
   if (success) {
-    return (
-      <div className='success'>
-        {message}
-      </div>
-    )
+    return <div className="success">{message}</div>
   } else {
-    return (
-      <div className ='error'>
-        {message}
-      </div>
-    )
+    return <div className="error">{message}</div>
   }
 }
 
