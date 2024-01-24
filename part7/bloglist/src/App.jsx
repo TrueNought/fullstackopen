@@ -6,22 +6,16 @@ import StatusBar from './components/StatusBar'
 import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import { useNotificationDispatch } from './components/NotificationContext'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [message, setMessage] = useState(null)
   const [success, setSuccess] = useState(false)
-
-  useEffect(() => {
-    const fetchBlogs = async () => {
-      const blogs = await blogService.getAll()
-      setBlogs(blogs)
-    }
-    fetchBlogs()
-  }, [])
+  const notificationDispatch = useNotificationDispatch()
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedUser')
@@ -32,6 +26,18 @@ const App = () => {
       blogService.setToken(user.token)
     }
   }, [])
+
+  const result = useQuery({
+    queryKey: ['blogs'],
+    queryFn: blogService.getAll,
+  })
+
+  const handleNotification = (options) => {
+    notificationDispatch(options)
+    setTimeout(() => {
+      notificationDispatch({ type: 'CLEAR' })
+    }, 5000)
+  }
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -44,17 +50,10 @@ const App = () => {
       setUsername('')
       setPassword('')
       setSuccess(true)
-      setMessage('Login successful')
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
-      console.log('Successfully logged in with', username, password)
+      handleNotification({ type: 'LOGIN_SUCCESS' })
     } catch (error) {
       setSuccess(false)
-      setMessage('Wrong username or password')
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
+      handleNotification({ type: 'LOGIN_FAIL' })
       console.error('Wrong credentials')
     }
   }
@@ -63,51 +62,65 @@ const App = () => {
     window.localStorage.removeItem('loggedUser')
     setUser(null)
     setSuccess(true)
-    setMessage('Logged out')
-    setTimeout(() => {
-      setMessage(null)
-    }, 5000)
+    handleNotification({ type: 'LOGOUT' })
   }
 
-  const handleCreate = async (newBlog) => {
-    try {
-      const blog = await blogService.create(newBlog)
+  const updateBlogMutation = useMutation({
+    mutationFn: blogService.update,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
       setSuccess(true)
-      setBlogs([...blogs, blog])
-      setMessage(`${newBlog.title} by ${newBlog.author} has been added`)
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
-    } catch (error) {
+    },
+    onError: (error) => {
       setSuccess(false)
-      setMessage(error.response.data.error)
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
-    }
+      handleNotification({ type: 'ERROR', error: error.response.data.error })
+    },
+  })
+
+  const createBlogMutation = useMutation({
+    mutationFn: blogService.create,
+    onSuccess: (newBlog) => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
+      setSuccess(true)
+      handleNotification({
+        type: 'CREATE',
+        title: newBlog.title,
+        author: newBlog.author,
+      })
+    },
+    onError: (error) => {
+      setSuccess(false)
+      handleNotification({ type: 'ERROR', error: error.response.data.error })
+    },
+  })
+
+  const deleteBlogMutation = useMutation({
+    mutationFn: blogService.del,
+    onSuccess: (_, deletedBlog) => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
+      setSuccess(true)
+      handleNotification({ type: 'DELETE', title: deletedBlog.title })
+    },
+    onError: (error) => {
+      setSuccess(false)
+      handleNotification({ type: 'ERROR', error: error.response.data.error })
+    },
+  })
+
+  const handleCreate = (newBlog) => {
+    createBlogMutation.mutate(newBlog)
   }
 
-  const handleLike = async (updatedBlog) => {
-    try {
-      await blogService.update(updatedBlog.id, updatedBlog)
-      setBlogs(blogs.map((b) => (b.id === updatedBlog.id ? updatedBlog : b)))
-    } catch (error) {
-      console.log(error.response.data.error)
-    }
+  const handleLike = (blog) => {
+    const updatedBlog = { ...blog, likes: blog.likes + 1 }
+    updateBlogMutation.mutate(updatedBlog)
   }
 
-  const handleDelete = async (deletedBlog) => {
-    try {
-      if (
-        window.confirm(`Remove ${deletedBlog.title} by ${deletedBlog.author}?`)
-      ) {
-        await blogService.del(deletedBlog.id)
-        setSuccess(true)
-        setBlogs(blogs.filter((b) => b.id !== deletedBlog.id))
-        setMessage(`${deletedBlog.title} has been removed`)
-      }
-    } catch (error) {
-      console.log(error.response.data.error)
+  const handleDelete = (deletedBlog) => {
+    if (
+      window.confirm(`Remove ${deletedBlog.title} by ${deletedBlog.author}?`)
+    ) {
+      deleteBlogMutation.mutate(deletedBlog)
     }
   }
 
@@ -160,18 +173,27 @@ const App = () => {
               key={blog.id}
               blog={blog}
               user={user}
-              updateBlog={handleLike}
-              deleteBlog={handleDelete}
+              handleLike={() => handleLike(blog)}
+              handleDelete={() => handleDelete(blog)}
             />
           ))}
       </>
     )
   }
+  if (result.isLoading) {
+    return <div>loading data...</div>
+  }
+
+  if (result.isError) {
+    return <div>anecdote service not available due to problems in server</div>
+  }
+
+  const blogs = result.data
 
   return (
     <div>
       <Title user={user} />
-      <StatusBar message={message} success={success} />
+      <StatusBar success={success} />
       {user === null ? loginForm() : blogForm()}
     </div>
   )
