@@ -1,15 +1,15 @@
 import { useNotificationValue } from './NotificationContext'
 
-const StatusBar = ({ success }) => {
+const StatusBar = () => {
   const notification = useNotificationValue()
   if (!notification) {
     return null
   }
 
-  if (success) {
-    return <div className="success">{notification}</div>
+  if (notification.success) {
+    return <div className="success">{notification.message}</div>
   } else {
-    return <div className="error">{notification}</div>
+    return <div className="error">{notification.message}</div>
   }
 }
 

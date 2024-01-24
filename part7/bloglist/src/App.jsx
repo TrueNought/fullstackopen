@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useReducer } from 'react'
 import Blog from './components/Blog'
 import Title from './components/Title'
 import BlogForm from './components/BlogForm'
@@ -9,11 +9,21 @@ import loginService from './services/login'
 import { useNotificationDispatch } from './components/NotificationContext'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
+const userReducer = (state, action) => {
+  switch (action.type) {
+    case 'LOGIN':
+      return action.info
+    case 'LOGOUT':
+      return null
+    default:
+      return state
+  }
+}
+
 const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [user, setUser] = useState(null)
-  const [success, setSuccess] = useState(false)
+  const [user, userDispatch] = useReducer(userReducer, null)
   const notificationDispatch = useNotificationDispatch()
   const queryClient = useQueryClient()
 
@@ -22,9 +32,10 @@ const App = () => {
 
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
-      setUser(user)
+      userDispatch({ type: 'LOGIN', info: user })
       blogService.setToken(user.token)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const result = useQuery({
@@ -45,14 +56,12 @@ const App = () => {
     try {
       const user = await loginService.login({ username, password })
       window.localStorage.setItem('loggedUser', JSON.stringify(user))
-      setUser(user)
+      userDispatch({ type: 'LOGIN', info: user })
       blogService.setToken(user.token)
       setUsername('')
       setPassword('')
-      setSuccess(true)
       handleNotification({ type: 'LOGIN_SUCCESS' })
     } catch (error) {
-      setSuccess(false)
       handleNotification({ type: 'LOGIN_FAIL' })
       console.error('Wrong credentials')
     }
@@ -60,8 +69,7 @@ const App = () => {
 
   const handleLogout = () => {
     window.localStorage.removeItem('loggedUser')
-    setUser(null)
-    setSuccess(true)
+    userDispatch({ type: 'LOGOUT' })
     handleNotification({ type: 'LOGOUT' })
   }
 
@@ -69,10 +77,8 @@ const App = () => {
     mutationFn: blogService.update,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blogs'] })
-      setSuccess(true)
     },
     onError: (error) => {
-      setSuccess(false)
       handleNotification({ type: 'ERROR', error: error.response.data.error })
     },
   })
@@ -81,7 +87,6 @@ const App = () => {
     mutationFn: blogService.create,
     onSuccess: (newBlog) => {
       queryClient.invalidateQueries({ queryKey: ['blogs'] })
-      setSuccess(true)
       handleNotification({
         type: 'CREATE',
         title: newBlog.title,
@@ -89,7 +94,6 @@ const App = () => {
       })
     },
     onError: (error) => {
-      setSuccess(false)
       handleNotification({ type: 'ERROR', error: error.response.data.error })
     },
   })
@@ -98,11 +102,9 @@ const App = () => {
     mutationFn: blogService.del,
     onSuccess: (_, deletedBlog) => {
       queryClient.invalidateQueries({ queryKey: ['blogs'] })
-      setSuccess(true)
       handleNotification({ type: 'DELETE', title: deletedBlog.title })
     },
     onError: (error) => {
-      setSuccess(false)
       handleNotification({ type: 'ERROR', error: error.response.data.error })
     },
   })
@@ -193,7 +195,7 @@ const App = () => {
   return (
     <div>
       <Title user={user} />
-      <StatusBar success={success} />
+      <StatusBar />
       {user === null ? loginForm() : blogForm()}
     </div>
   )

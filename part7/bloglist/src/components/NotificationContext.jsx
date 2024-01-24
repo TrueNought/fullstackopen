@@ -3,17 +3,20 @@ import { createContext, useReducer, useContext } from 'react'
 const notificationReducer = (state, action) => {
   switch (action.type) {
     case 'LOGIN_SUCCESS':
-      return 'Login successful'
+      return { message: 'Login successful', success: true }
     case 'LOGIN_FAIL':
-      return 'Wrong username or password'
+      return { message: 'Wrong username or password', success: false }
     case 'LOGOUT':
-      return 'Logged out'
+      return { message: 'Logged out', success: true }
     case 'CREATE':
-      return `${action.title} by ${action.author} has been added`
+      return {
+        message: `${action.title} by ${action.author} has been added`,
+        success: true,
+      }
     case 'DELETE':
-      return `${action.title} has been removed`
+      return { message: `${action.title} has been removed`, success: true }
     case 'ERROR':
-      return `${action.error}`
+      return { message: `${action.error}`, success: false }
     case 'CLEAR':
       return null
     default:
@@ -35,7 +38,10 @@ export const useNotificationDispatch = () => {
 }
 
 export const NotificationContextProvider = (props) => {
-  const [notification, notificationDispatch] = useReducer(notificationReducer, null)
+  const [notification, notificationDispatch] = useReducer(
+    notificationReducer,
+    null,
+  )
 
   return (
     <NotificationContext.Provider value={[notification, notificationDispatch]}>
