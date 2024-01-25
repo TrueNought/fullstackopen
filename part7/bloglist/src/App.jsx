@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef, useReducer } from 'react'
 import Blog from './components/Blog'
-import Title from './components/Title'
 import BlogForm from './components/BlogForm'
 import StatusBar from './components/StatusBar'
 import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import userService from './services/users'
 import { useNotificationDispatch } from './components/NotificationContext'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link, useMatch, Route, Routes } from 'react-router-dom'
 
 const userReducer = (state, action) => {
   switch (action.type) {
@@ -26,6 +27,8 @@ const App = () => {
   const [user, userDispatch] = useReducer(userReducer, null)
   const notificationDispatch = useNotificationDispatch()
   const queryClient = useQueryClient()
+  const userMatch = useMatch('/users/:id')
+  const blogMatch = useMatch('/blogs/:id')
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedUser')
@@ -38,13 +41,18 @@ const App = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const result = useQuery({
+  const blogsQuery = useQuery({
     queryKey: ['blogs'],
     queryFn: blogService.getAll,
   })
 
-  const handleNotification = (options) => {
-    notificationDispatch(options)
+  const usersQuery = useQuery({
+    queryKey: ['users'],
+    queryFn: userService.getAll
+  })
+
+  const handleNotification = (type) => {
+    notificationDispatch(type)
     setTimeout(() => {
       notificationDispatch({ type: 'CLEAR' })
     }, 5000)
@@ -126,49 +134,105 @@ const App = () => {
     }
   }
 
-  const loginForm = () => (
+  const UserList = ({ users }) => {
+    return (
+      <div>
+        <h2>Users</h2>
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Blogs Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map(user => (
+              <tr key={user.id}>
+                <td>
+                  <Link to={`/users/${user.id}`}>{user.name}</Link>
+                </td>
+                <td>{user.blogs.length}</td>
+              </tr>
+            ))}
+          </tbody>
+      </table>
+    </div>
+    )
+  }
+
+  const User = ({ user }) => {
+    return (
+      <div>
+        <h2>{user.name}</h2>
+        <h3>added blogs</h3>
+        <ul>
+          {user.blogs.map(blog => (
+            <li key={blog.id}>{blog.title}</li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
+  const BlogView = ({ blog, user, handleLike, handleDelete }) => {
+    return (
+      <div>
+        <h2>{blog.title}</h2>
+        {blog.url}
+        <br />
+        {`likes: ${blog.likes} `}
+        <button onClick={handleLike} className="likeButton">
+          like
+        </button>
+        <br />
+        added by {blog.user.name}
+        <br />
+        {user.username === blog.user.username && (
+          <button onClick={handleDelete}>remove</button>
+        )}
+      </div>
+    )
+  }
+
+  const login = () => {
+    return (
     <>
+      <h2>Please enter your credentials</h2>
+      <StatusBar />
       <form onSubmit={handleLogin}>
         <div>
           username:
           <input
             name="username"
             value={username}
-            onChange={({ target }) => setUsername(target.value)}
+            onChange={(event) => setUsername(event.target.value)}
           />
         </div>
         <div>
           password:
           <input
-            name="pasword"
+            name="password"
             value={password}
-            onChange={({ target }) => setPassword(target.value)}
+            onChange={(event) => setPassword(event.target.value)}
           />
         </div>
         <button type="submit">login</button>
       </form>
     </>
-  )
+    )
+  }
 
   const blogFormRef = useRef()
 
-  const blogForm = () => {
+  const Blogs = () => {
     return (
-      <>
-        <div>
-          {`${user.name} logged in `}
-          <button type="submit" onClick={handleLogout}>
-            logout
-          </button>
-        </div>
-        <br />
-
+      <div>
         <Togglable buttonLabel="new blog" ref={blogFormRef}>
           <BlogForm addBlog={handleCreate} />
         </Togglable>
         <br />
 
-        {blogs
+        {blogsQuery.data
           .sort((a, b) => b.likes - a.likes)
           .map((blog) => (
             <Blog
@@ -179,24 +243,58 @@ const App = () => {
               handleDelete={() => handleDelete(blog)}
             />
           ))}
-      </>
+      </div>
     )
   }
-  if (result.isLoading) {
+
+  if (blogsQuery.isLoading || usersQuery.isLoading) {
     return <div>loading data...</div>
   }
 
-  if (result.isError) {
+  if (blogsQuery.isError || usersQuery.isError) {
     return <div>anecdote service not available due to problems in server</div>
   }
 
-  const blogs = result.data
+  const users = usersQuery.data
+  const userInfo = userMatch
+    ? users.find(user => user.id === userMatch.params.id)
+    : null
+
+  const blogs = blogsQuery.data
+  const blogInfo = blogMatch
+    ? blogs.find(blog => blog.id === blogMatch.params.id)
+    : null
+
+  const nav = {
+    padding: 5,
+  }
+
+  if (!user) {
+    return (
+      login()
+    )
+  }
 
   return (
     <div>
-      <Title user={user} />
+      <div style={{backgroundColor: "lightGray"}}>
+        <Link style={nav} to="/">Blogs</Link>
+        <Link style={nav} to="/users">Users</Link>
+        {`${user.name} logged in `}
+        <button type="submit" onClick={handleLogout}>
+          logout
+        </button>
+      </div>
+      <h2>Blog App</h2>
       <StatusBar />
-      {user === null ? loginForm() : blogForm()}
+      <div>
+        <Routes>
+          <Route path='/users/:id' element={<User user={userInfo} />} />
+          <Route path='/users' element={<UserList users={users} />} />
+          <Route path='/blogs/:id' element={<BlogView blog={blogInfo} user={user} handleLike={() => handleLike(blogInfo)} handleDelete={() => handleDelete(blogInfo)} />} />
+          <Route path='/' element={<Blogs />} />
+        </Routes>
+      </div>
     </div>
   )
 }

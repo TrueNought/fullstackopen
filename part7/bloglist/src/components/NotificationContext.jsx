@@ -1,6 +1,7 @@
 import { createContext, useReducer, useContext } from 'react'
 
 const notificationReducer = (state, action) => {
+  console.log('current reducer', state, action)
   switch (action.type) {
     case 'LOGIN_SUCCESS':
       return { message: 'Login successful', success: true }
