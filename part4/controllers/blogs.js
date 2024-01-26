@@ -81,6 +81,7 @@ blogsRouter.delete('/:id', middleware.userExtractor, async (request, response) =
 
   if (blog.user.toString() === user._id.toString()) {
     await Blog.findByIdAndDelete(request.params.id)
+    await Comment.deleteMany({ blog: request.params.id })
     response.status(204).end()
   } else {
     response.status(403).json({ error: 'You do not have permission to delete this blog' })
