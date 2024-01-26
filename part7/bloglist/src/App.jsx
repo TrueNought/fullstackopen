@@ -118,6 +118,13 @@ const App = () => {
     },
   })
 
+  const createCommentMutation = useMutation({
+    mutationFn: blogService.createComment,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
+    }
+  })
+
   const handleCreate = (newBlog) => {
     createBlogMutation.mutate(newBlog)
   }
@@ -134,6 +141,12 @@ const App = () => {
       deleteBlogMutation.mutate(deletedBlog)
       navigate('/')
     }
+  }
+
+  const handleComment = (id, comment) => {
+    const newComment = { content: comment, blog: id }
+    console.log(newComment)
+    createCommentMutation.mutate(newComment)
   }
 
   const UserList = ({ users }) => {
@@ -176,25 +189,46 @@ const App = () => {
     )
   }
 
-  const BlogView = ({ blog, user, handleLike, handleDelete }) => {
+  const BlogView = ({ blog, user, handleLike, handleDelete, handleComment }) => {
+    const [comment, setComment] = useState('')
+
+    const addComment = (event) => {
+      event.preventDefault()
+      handleComment(blog.id, comment)
+    }
+    
     if (!blog) {
       return null
     }
     return (
       <div>
-        <h2>{blog.title}</h2>
-        {blog.url}
-        <br />
-        {`likes: ${blog.likes} `}
-        <button onClick={handleLike} className="likeButton">
-          like
-        </button>
-        <br />
-        added by {blog.user.name}
-        <br />
-        {user.username === blog.user.username && (
-          <button onClick={handleDelete}>remove</button>
-        )}
+        <div>
+          <h2>{blog.title}</h2>
+          {blog.url}
+          <br />
+          {`likes: ${blog.likes} `}
+          <button onClick={handleLike} className="likeButton">
+            like
+          </button>
+          <br />
+          added by {blog.user.name}
+          <br />
+          {user.username === blog.user.username && (
+            <button onClick={handleDelete}>remove</button>
+          )}
+        </div>
+        <div>
+          <h3>Comments</h3>
+          <form onSubmit={addComment}>
+            <input name="comment" value={comment} onChange={(event) => setComment(event.target.value)} />
+            <button type="submit">add comment</button>
+          </form>
+          <ul>
+            {blog.comments.map(comment => (
+              <li key={comment.id}>{comment.content}</li>
+            ))}
+          </ul>
+        </div>
       </div>
     )
   }
@@ -243,9 +277,6 @@ const App = () => {
             <Blog
               key={blog.id}
               blog={blog}
-              user={user}
-              handleLike={() => handleLike(blog)}
-              handleDelete={() => handleDelete(blog)}
             />
           ))}
       </div>
@@ -296,7 +327,7 @@ const App = () => {
         <Routes>
           <Route path='/users/:id' element={<User user={userInfo} />} />
           <Route path='/users' element={<UserList users={users} />} />
-          <Route path='/blogs/:id' element={<BlogView blog={blogInfo} user={user} handleLike={() => handleLike(blogInfo)} handleDelete={() => handleDelete(blogInfo)} />} />
+          <Route path='/blogs/:id' element={<BlogView blog={blogInfo} user={user} handleLike={() => handleLike(blogInfo)} handleDelete={() => handleDelete(blogInfo)} handleComment={handleComment} />} />
           <Route path='/' element={<Blogs />} />
         </Routes>
       </div>
