@@ -8,7 +8,7 @@ import loginService from './services/login'
 import userService from './services/users'
 import { useNotificationDispatch } from './components/NotificationContext'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link, useMatch, Route, Routes } from 'react-router-dom'
+import { Link, useMatch, Route, Routes, useNavigate } from 'react-router-dom'
 
 const userReducer = (state, action) => {
   switch (action.type) {
@@ -29,6 +29,7 @@ const App = () => {
   const queryClient = useQueryClient()
   const userMatch = useMatch('/users/:id')
   const blogMatch = useMatch('/blogs/:id')
+  const navigate = useNavigate()
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedUser')
@@ -131,6 +132,7 @@ const App = () => {
       window.confirm(`Remove ${deletedBlog.title} by ${deletedBlog.author}?`)
     ) {
       deleteBlogMutation.mutate(deletedBlog)
+      navigate('/')
     }
   }
 
@@ -175,6 +177,9 @@ const App = () => {
   }
 
   const BlogView = ({ blog, user, handleLike, handleDelete }) => {
+    if (!blog) {
+      return null
+    }
     return (
       <div>
         <h2>{blog.title}</h2>
