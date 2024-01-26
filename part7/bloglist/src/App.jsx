@@ -1,14 +1,16 @@
 import { useState, useEffect, useRef, useReducer } from 'react'
-import Blog from './components/Blog'
-import BlogForm from './components/BlogForm'
+import BlogList from './components/BlogList'
 import StatusBar from './components/StatusBar'
-import Togglable from './components/Togglable'
+import BlogView from './components/BlogView'
+import UserList from './components/UserList'
+import UserView from './components/UserView'
+import NavBar from './components/NavBar'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import userService from './services/users'
 import { useNotificationDispatch } from './components/NotificationContext'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link, useMatch, Route, Routes, useNavigate } from 'react-router-dom'
+import { useMatch, Route, Routes, useNavigate } from 'react-router-dom'
 
 const userReducer = (state, action) => {
   switch (action.type) {
@@ -30,6 +32,7 @@ const App = () => {
   const userMatch = useMatch('/users/:id')
   const blogMatch = useMatch('/blogs/:id')
   const navigate = useNavigate()
+  const blogFormRef = useRef()
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedUser')
@@ -49,38 +52,8 @@ const App = () => {
 
   const usersQuery = useQuery({
     queryKey: ['users'],
-    queryFn: userService.getAll
+    queryFn: userService.getAll,
   })
-
-  const handleNotification = (type) => {
-    notificationDispatch(type)
-    setTimeout(() => {
-      notificationDispatch({ type: 'CLEAR' })
-    }, 5000)
-  }
-
-  const handleLogin = async (event) => {
-    event.preventDefault()
-
-    try {
-      const user = await loginService.login({ username, password })
-      window.localStorage.setItem('loggedUser', JSON.stringify(user))
-      userDispatch({ type: 'LOGIN', info: user })
-      blogService.setToken(user.token)
-      setUsername('')
-      setPassword('')
-      handleNotification({ type: 'LOGIN_SUCCESS' })
-    } catch (error) {
-      handleNotification({ type: 'LOGIN_FAIL' })
-      console.error('Wrong credentials')
-    }
-  }
-
-  const handleLogout = () => {
-    window.localStorage.removeItem('loggedUser')
-    userDispatch({ type: 'LOGOUT' })
-    handleNotification({ type: 'LOGOUT' })
-  }
 
   const updateBlogMutation = useMutation({
     mutationFn: blogService.update,
@@ -122,8 +95,38 @@ const App = () => {
     mutationFn: blogService.createComment,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blogs'] })
-    }
+    },
   })
+
+  const handleNotification = (type) => {
+    notificationDispatch(type)
+    setTimeout(() => {
+      notificationDispatch({ type: 'CLEAR' })
+    }, 5000)
+  }
+
+  const handleLogin = async (event) => {
+    event.preventDefault()
+
+    try {
+      const user = await loginService.login({ username, password })
+      window.localStorage.setItem('loggedUser', JSON.stringify(user))
+      userDispatch({ type: 'LOGIN', info: user })
+      blogService.setToken(user.token)
+      setUsername('')
+      setPassword('')
+      handleNotification({ type: 'LOGIN_SUCCESS' })
+    } catch (error) {
+      handleNotification({ type: 'LOGIN_FAIL' })
+      console.error('Wrong credentials')
+    }
+  }
+
+  const handleLogout = () => {
+    window.localStorage.removeItem('loggedUser')
+    userDispatch({ type: 'LOGOUT' })
+    handleNotification({ type: 'LOGOUT' })
+  }
 
   const handleCreate = (newBlog) => {
     createBlogMutation.mutate(newBlog)
@@ -145,140 +148,33 @@ const App = () => {
 
   const handleComment = (id, comment) => {
     const newComment = { content: comment, blog: id }
-    console.log(newComment)
     createCommentMutation.mutate(newComment)
-  }
-
-  const UserList = ({ users }) => {
-    return (
-      <div>
-        <h2>Users</h2>
-        <table>
-          <thead>
-            <tr>
-              <th></th>
-              <th>Blogs Created</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map(user => (
-              <tr key={user.id}>
-                <td>
-                  <Link to={`/users/${user.id}`}>{user.name}</Link>
-                </td>
-                <td>{user.blogs.length}</td>
-              </tr>
-            ))}
-          </tbody>
-      </table>
-    </div>
-    )
-  }
-
-  const User = ({ user }) => {
-    return (
-      <div>
-        <h2>{user.name}</h2>
-        <h3>added blogs</h3>
-        <ul>
-          {user.blogs.map(blog => (
-            <li key={blog.id}>{blog.title}</li>
-          ))}
-        </ul>
-      </div>
-    )
-  }
-
-  const BlogView = ({ blog, user, handleLike, handleDelete, handleComment }) => {
-    const [comment, setComment] = useState('')
-
-    const addComment = (event) => {
-      event.preventDefault()
-      handleComment(blog.id, comment)
-    }
-    
-    if (!blog) {
-      return null
-    }
-    return (
-      <div>
-        <div>
-          <h2>{blog.title}</h2>
-          {blog.url}
-          <br />
-          {`likes: ${blog.likes} `}
-          <button onClick={handleLike} className="likeButton">
-            like
-          </button>
-          <br />
-          added by {blog.user.name}
-          <br />
-          {user.username === blog.user.username && (
-            <button onClick={handleDelete}>remove</button>
-          )}
-        </div>
-        <div>
-          <h3>Comments</h3>
-          <form onSubmit={addComment}>
-            <input name="comment" value={comment} onChange={(event) => setComment(event.target.value)} />
-            <button type="submit">add comment</button>
-          </form>
-          <ul>
-            {blog.comments.map(comment => (
-              <li key={comment.id}>{comment.content}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    )
   }
 
   const login = () => {
     return (
-    <>
-      <h2>Please enter your credentials</h2>
-      <StatusBar />
-      <form onSubmit={handleLogin}>
-        <div>
-          username:
-          <input
-            name="username"
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-          />
-        </div>
-        <div>
-          password:
-          <input
-            name="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </div>
-        <button type="submit">login</button>
-      </form>
-    </>
-    )
-  }
-
-  const blogFormRef = useRef()
-
-  const Blogs = () => {
-    return (
       <div>
-        <Togglable buttonLabel="new blog" ref={blogFormRef}>
-          <BlogForm addBlog={handleCreate} />
-        </Togglable>
-        <br />
-
-        {blogsQuery.data
-          .sort((a, b) => b.likes - a.likes)
-          .map((blog) => (
-            <Blog
-              key={blog.id}
-              blog={blog}
+        <h2>Please enter your credentials</h2>
+        <StatusBar />
+        <form onSubmit={handleLogin}>
+          <div>
+            username:
+            <input
+              name="username"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
             />
-          ))}
+          </div>
+          <div>
+            password:
+            <input
+              name="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </div>
+          <button type="submit">login</button>
+        </form>
       </div>
     )
   }
@@ -293,42 +189,49 @@ const App = () => {
 
   const users = usersQuery.data
   const userInfo = userMatch
-    ? users.find(user => user.id === userMatch.params.id)
+    ? users.find((user) => user.id === userMatch.params.id)
     : null
 
   const blogs = blogsQuery.data
   const blogInfo = blogMatch
-    ? blogs.find(blog => blog.id === blogMatch.params.id)
+    ? blogs.find((blog) => blog.id === blogMatch.params.id)
     : null
 
-  const nav = {
-    padding: 5,
-  }
-
   if (!user) {
-    return (
-      login()
-    )
+    return login()
   }
 
   return (
     <div>
-      <div style={{backgroundColor: "lightGray"}}>
-        <Link style={nav} to="/">Blogs</Link>
-        <Link style={nav} to="/users">Users</Link>
-        {`${user.name} logged in `}
-        <button type="submit" onClick={handleLogout}>
-          logout
-        </button>
-      </div>
+      <NavBar username={user.name} handleLogout={handleLogout} />
       <h2>Blog App</h2>
       <StatusBar />
       <div>
         <Routes>
-          <Route path='/users/:id' element={<User user={userInfo} />} />
-          <Route path='/users' element={<UserList users={users} />} />
-          <Route path='/blogs/:id' element={<BlogView blog={blogInfo} user={user} handleLike={() => handleLike(blogInfo)} handleDelete={() => handleDelete(blogInfo)} handleComment={handleComment} />} />
-          <Route path='/' element={<Blogs />} />
+          <Route path="/users/:id" element={<UserView user={userInfo} />} />
+          <Route path="/users" element={<UserList users={users} />} />
+          <Route
+            path="/blogs/:id"
+            element={
+              <BlogView
+                blog={blogInfo}
+                user={user}
+                handleLike={() => handleLike(blogInfo)}
+                handleDelete={() => handleDelete(blogInfo)}
+                handleComment={handleComment}
+              />
+            }
+          />
+          <Route
+            path="/"
+            element={
+              <BlogList
+                blogs={blogsQuery.data}
+                blogFormRef={blogFormRef}
+                handleCreate={handleCreate}
+              />
+            }
+          />
         </Routes>
       </div>
     </div>

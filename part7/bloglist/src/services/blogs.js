@@ -34,8 +34,11 @@ const del = async (deletedObject) => {
   return response
 }
 
-const createComment = async(newComment) => {
-  const response = await axios.post(`${baseUrl}/${newComment.blog}/comments`, newComment)
+const createComment = async (newComment) => {
+  const response = await axios.post(
+    `${baseUrl}/${newComment.blog}/comments`,
+    newComment,
+  )
   return response.data
 }
 
