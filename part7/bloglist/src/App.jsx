@@ -11,6 +11,7 @@ import userService from './services/users'
 import { useNotificationDispatch } from './components/NotificationContext'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMatch, Route, Routes, useNavigate } from 'react-router-dom'
+import { Container, TextField, Button, Typography, Box, CssBaseline } from '@mui/material'
 
 const userReducer = (state, action) => {
   switch (action.type) {
@@ -109,6 +110,7 @@ const App = () => {
     event.preventDefault()
 
     try {
+      console.log('logging in with', 'username', username, 'password', password)
       const user = await loginService.login({ username, password })
       window.localStorage.setItem('loggedUser', JSON.stringify(user))
       userDispatch({ type: 'LOGIN', info: user })
@@ -153,29 +155,24 @@ const App = () => {
 
   const login = () => {
     return (
-      <div>
-        <h2>Please enter your credentials</h2>
-        <StatusBar />
-        <form onSubmit={handleLogin}>
-          <div>
-            username:
-            <input
-              name="username"
-              value={username}
-              onChange={(event) => setUsername(event.target.value)}
-            />
-          </div>
-          <div>
-            password:
-            <input
-              name="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-            />
-          </div>
-          <button type="submit">login</button>
-        </form>
-      </div>
+      <>
+        <Container component="main" maxWidth="xs">
+          <StatusBar />
+          <CssBaseline />
+          <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', }}>
+            <Typography component="h1" variant="h5">
+              Sign in
+            </Typography>
+            <Box component="form" onSubmit={handleLogin} sx={{ mt: 1 }}>
+              <TextField label="Username" name="username" value={username} onChange={(event) => setUsername(event.target.value)} margin="normal" required autoFocus fullWidth />
+              <TextField label="Password" name="password" value={password} type="password" onChange={(event) => setPassword(event.target.value)} margin="normal" required autoFocus fullWidth />
+              <Button variant="contained" color="primary" type="submit" noValidate sx={{ mt: 3, mb: 2 }} fullWidth>
+                login
+              </Button>
+            </Box>
+          </Box>
+        </Container>
+      </>
     )
   }
 
@@ -202,38 +199,40 @@ const App = () => {
   }
 
   return (
-    <div>
-      <NavBar username={user.name} handleLogout={handleLogout} />
-      <h2>Blog App</h2>
-      <StatusBar />
-      <div>
-        <Routes>
-          <Route path="/users/:id" element={<UserView user={userInfo} />} />
-          <Route path="/users" element={<UserList users={users} />} />
-          <Route
-            path="/blogs/:id"
-            element={
-              <BlogView
-                blog={blogInfo}
-                user={user}
-                handleLike={() => handleLike(blogInfo)}
-                handleDelete={() => handleDelete(blogInfo)}
-                handleComment={handleComment}
-              />
-            }
-          />
-          <Route
-            path="/"
-            element={
-              <BlogList
-                blogs={blogsQuery.data}
-                blogFormRef={blogFormRef}
-                handleCreate={handleCreate}
-              />
-            }
-          />
-        </Routes>
-      </div>
+    <div style={{ fontFamily: 'Roboto, sans-serif' }} >
+      <Container>
+        <StatusBar />
+        <NavBar username={user.name} handleLogout={handleLogout} />
+        <h2>Blog App</h2>
+        <div>
+          <Routes>
+            <Route path="/users/:id" element={<UserView user={userInfo} />} />
+            <Route path="/users" element={<UserList users={users} />} />
+            <Route
+              path="/blogs/:id"
+              element={
+                <BlogView
+                  blog={blogInfo}
+                  user={user}
+                  handleLike={() => handleLike(blogInfo)}
+                  handleDelete={() => handleDelete(blogInfo)}
+                  handleComment={handleComment}
+                />
+              }
+            />
+            <Route
+              path="/"
+              element={
+                <BlogList
+                  blogs={blogsQuery.data}
+                  blogFormRef={blogFormRef}
+                  handleCreate={handleCreate}
+                />
+              }
+            />
+          </Routes>
+        </div>
+      </Container>
     </div>
   )
 }

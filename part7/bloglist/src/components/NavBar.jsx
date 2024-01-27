@@ -1,23 +1,36 @@
 import { Link } from 'react-router-dom'
-
-const nav = {
-  padding: 5,
-}
+import { AppBar, Toolbar, Button, Typography } from '@mui/material'
 
 const NavBar = ({ username, handleLogout }) => {
   return (
-    <div style={{ backgroundColor: 'lightGray' }}>
-      <Link style={nav} to="/">
-        Blogs
-      </Link>
-      <Link style={nav} to="/users">
-        Users
-      </Link>
-      {`${username} logged in `}
-      <button type="submit" onClick={handleLogout}>
-        logout
-      </button>
-    </div>
+    <AppBar position="static" color="default" elevation={0} style={{ borderBottom: '1px solid #e0e0e0' }}>
+      <Toolbar style={{ display: 'flex', justifyContent: 'space-between', padding: '0' }}>
+        <nav>
+          <Link
+            color="text.primary"
+            to="/"
+            style={{ margin: '8px' }}
+          >
+            Blogs
+          </Link>
+          <Link
+            color="text.primary"
+            to="/users"
+            style={{ margin: '8px' }}
+          >
+            Users
+          </Link>
+        </nav>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <Typography color="inherit" noWrap style={{ margin: '8px' }}>
+            {`${username} logged in`}
+          </Typography>
+          <Button onClick={handleLogout} variant="outlined" style={{ margin: '8px' }}>
+            Logout
+          </Button>
+        </div>
+      </Toolbar>
+    </AppBar>
   )
 }
 

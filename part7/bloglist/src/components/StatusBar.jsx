@@ -1,4 +1,5 @@
 import { useNotificationValue } from './NotificationContext'
+import { Alert } from '@mui/material'
 
 const StatusBar = () => {
   const notification = useNotificationValue()
@@ -7,9 +8,9 @@ const StatusBar = () => {
     return null
   }
   if (notification.success) {
-    return <div className="success">{notification.message}</div>
+    return <Alert severity="success">{notification.message}</Alert>
   } else {
-    return <div className="error">{notification.message}</div>
+    return <Alert severity="error">{notification.message}</Alert>
   }
 }
 

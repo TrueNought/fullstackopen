@@ -1,6 +1,14 @@
 import Togglable from './Togglable'
 import BlogForm from './BlogForm'
-import Blog from './Blog'
+import { Link } from 'react-router-dom'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Paper,
+} from '@mui/material'
 
 const BlogList = ({ blogs, blogFormRef, handleCreate }) => {
   return (
@@ -10,11 +18,24 @@ const BlogList = ({ blogs, blogFormRef, handleCreate }) => {
       </Togglable>
       <br />
 
-      {blogs
-        .sort((a, b) => b.likes - a.likes)
-        .map((blog) => (
-          <Blog key={blog.id} blog={blog} />
-        ))}
+      <TableContainer component={Paper} elevation={0}>
+        <Table>
+          <TableBody>
+          {blogs
+            .sort((a, b) => b.likes - a.likes)
+            .map((blog) => (
+              <TableRow key={blog.id}>
+                <TableCell>
+                  <Link to={`/blogs/${blog.id}`}>{blog.title}</Link>
+                </TableCell>
+                <TableCell>
+                  {blog.author}
+                </TableCell>
+              </TableRow>
+          ))}
+        </TableBody>
+        </Table>
+      </TableContainer>
     </div>
   )
 }
