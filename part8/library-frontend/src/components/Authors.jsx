@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation } from '@apollo/client'
 import { ALL_AUTHORS, EDIT_AUTHOR } from '../queries'
 
-const Authors = (props) => {
+const Authors = () => {
   const [name, setName] = useState('')
   const [born, setBorn] = useState('')
   
@@ -11,7 +11,7 @@ const Authors = (props) => {
     refetchQueries: [{ query: ALL_AUTHORS }]
   })
 
-  if (!props.show || result.loading) {
+  if (result.loading) {
     return null
   }
 
