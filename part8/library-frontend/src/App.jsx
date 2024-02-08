@@ -4,11 +4,13 @@ import Books from './components/Books'
 import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
 import Recs from './components/Recs'
-import { useApolloClient } from '@apollo/client'
+import { useApolloClient, useQuery } from '@apollo/client'
+import { ALL_BOOKS } from './queries'
 
 const App = () => {
   const [page, setPage] = useState('authors')
   const [token, setToken] = useState(null)
+  const result = useQuery(ALL_BOOKS)
   const client = useApolloClient()
 
   useEffect(() => {
@@ -25,6 +27,20 @@ const App = () => {
     setPage('authors')
   }
 
+  if (result.loading) {
+    return null
+  }
+
+  const books = result.data.allBooks
+  let genres = new Set()
+  books.forEach(b => {
+    b.genres.forEach(g => {
+      genres.add(g)
+    })
+  })
+  genres.add('all genres')
+  genres = Array.from(genres)
+
   return (
     <div>
       <div>
@@ -37,10 +53,10 @@ const App = () => {
       </div>
 
       {page === 'authors' && <Authors />}
-      {page === 'books' && <Books />}
+      {page === 'books' && <Books genres={genres} />}
       {page === 'login' && <LoginForm setToken={setToken} setPage={setPage} />}
       {page === 'add' && <NewBook />}
-      {page === 'recs' && <Recs />}
+      {page === 'recs' && <Recs books={books} />}
     </div>
   )
 }

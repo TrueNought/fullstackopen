@@ -1,16 +1,15 @@
 import { useQuery } from '@apollo/client'
-import { ALL_BOOKS, USER } from '../queries'
+import { USER } from '../queries'
 
-const Recs = () => {
-  const books = useQuery(ALL_BOOKS)
+const Recs = ({ books }) => {
   const genre = useQuery(USER)
 
-  if (books.loading || genre.loading) {
+  if (genre.loading) {
     return null
   }
 
   const favoriteGenre = genre.data.me.favoriteGenre
-  const recBooks = books.data.allBooks.filter(b => b.genres.includes(favoriteGenre))
+  const recBooks = books.filter(b => b.genres.includes(favoriteGenre))
 
   return (
     <div>
