@@ -67,7 +67,7 @@ const App = () => {
       {page === 'authors' && <Authors />}
       {page === 'books' && <Books genres={genres} />}
       {page === 'login' && <LoginForm setToken={setToken} setPage={setPage} />}
-      {page === 'add' && <NewBook />}
+      {page === 'add' && <NewBook setPage={setPage} />}
       {page === 'recs' && <Recs books={books} />}
     </div>
   )
